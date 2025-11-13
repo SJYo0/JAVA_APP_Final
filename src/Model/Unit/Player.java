@@ -1,4 +1,4 @@
-package Model;
+package Model.Unit;
 
 public class Player extends Unit {
 
