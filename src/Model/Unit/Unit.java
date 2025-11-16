@@ -1,4 +1,4 @@
-package Model;
+package Model.Unit;
 
 public class Unit {
     protected double unit_X,unit_Y;
