@@ -11,11 +11,11 @@ public class Action {
             return p;
         }
 
-        public Point parabola(){
+        /*public Point parabola(){
             // 구현하기
         }
 
         public boolean interfere(){
             // 구현하기
-        }
+        }*/
 }

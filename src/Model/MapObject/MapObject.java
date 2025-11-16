@@ -11,4 +11,12 @@ public class MapObject {
         object_Point = pObject_Point;
         object_Size =  pObject_Size;
     }
+
+    public Point getObject_Point(){
+        return object_Point;
+    }
+
+    public Size getObject_Size(){
+        return object_Size;
+    }
 }
