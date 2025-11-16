@@ -61,17 +61,17 @@ public class gamePanel extends JPanel implements ActionListener {
 
         addMouseListener(new MouseListener() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-
+            public void mousePressed(MouseEvent e) {
+                player.mousePressed(e);
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-
+                player.mouseReleased(e);
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {}
+            public void mouseClicked(MouseEvent e) {}
             @Override
             public void mouseEntered(MouseEvent e) {}
             @Override
@@ -113,5 +113,14 @@ public class gamePanel extends JPanel implements ActionListener {
                 this
                 );
 
+        if(player.getisHooked()){
+            g.setColor(Color.YELLOW);
+            g.drawLine(
+                    (int) player.getUnit_Point().x + player.getUnit_Size().width/2,
+                    (int) player.getUnit_Point().y + player.getUnit_Size().height/2,
+                    (int) player.getHookPoint().x,
+                    (int) player.getHookPoint().y
+                    );
+        }
     }
 }

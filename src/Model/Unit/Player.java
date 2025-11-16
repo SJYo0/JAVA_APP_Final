@@ -2,10 +2,12 @@ package Model.Unit;
 
 import Model.DTO.Point;
 import Model.DTO.Size;
+import Model.DTO.Vector;
 import Model.MapObject.Land;
 
 import javax.imageio.ImageIO;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +18,12 @@ public class Player extends Unit {
     private double hook_X, hook_Y;
     private double chainLength;
     private double angle;
-    private double angle_Velocity = 0;
+    private double angle_Velocity;
+    private Vector playerVector;
     private boolean canJump = false;
     private boolean isPressed[] = {false,false,false};
+    private boolean canDash = false;
+    private boolean isDashed = false;
 
     public BufferedImage image = null;
 
@@ -40,8 +45,11 @@ public class Player extends Unit {
             isPressed[2] = true;
         else if(e.getKeyCode() == KeyEvent.VK_A)
             isPressed[1] = true;
-        else if(e.getKeyCode() == KeyEvent.VK_W)
+        else if((e.getKeyCode() == KeyEvent.VK_W)|| (e.getKeyCode() == KeyEvent.VK_SPACE))
             isPressed[0] = true;
+        else if(e.getKeyCode() == KeyEvent.VK_SHIFT){
+            isDashed = true;
+        }
     }
 
     public void  keyReleased(KeyEvent e){
@@ -49,8 +57,35 @@ public class Player extends Unit {
             isPressed[2] = false;
         else if(e.getKeyCode() == KeyEvent.VK_A)
             isPressed[1] = false;
-        else if(e.getKeyCode() == KeyEvent.VK_W)
+        else if((e.getKeyCode() == KeyEvent.VK_W) || (e.getKeyCode() == KeyEvent.VK_SPACE))
             isPressed[0] = false;
+    }
+
+    public void mousePressed(MouseEvent e){
+        isHooked = true;
+        canDash = true;
+        canJump = false;
+        hook_X = e.getX();
+        hook_Y = e.getY();
+
+        double dx = unit_Point.x - hook_X;
+        double dy = unit_Point.y - hook_Y;
+        chainLength = Math.sqrt(dx*dx + dy*dy);
+        angle = Math.atan2(dy,dx);
+
+        angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 2;
+    }
+
+    public void mouseReleased(MouseEvent e) {
+        isHooked = false;
+        isDashed = false;
+        double speed = angle_Velocity * chainLength;
+        double xVector = -Math.sin(angle);
+        double yVector = Math.cos(angle);
+
+        unit_Velocity.Velocity_X = xVector * speed;
+        unit_Velocity.Velocity_Y = yVector * speed;
+
     }
 
     public void isInterfere_Object(Point pPoint, Size pSize){
@@ -89,30 +124,59 @@ public class Player extends Unit {
     }
 
     public void move(double pGravity){
-        if (isPressed[2] && !isPressed[1]){
-            unit_Velocity.Velocity_X = 9;
-        } else if(isPressed[1] && !isPressed[2]){
-            unit_Velocity.Velocity_X = -9;
-        } else {
-            unit_Velocity.Velocity_X = 0;
-        }
-
-        if (isPressed[0]){
-            if (canJump){
-                unit_Velocity.Velocity_Y = -25;
-                canJump = false;
+        if (isHooked){
+            swing(pGravity);
+            if(canDash && isDashed){
+                if(angle_Velocity >= 0){
+                    angle_Velocity = 47 / chainLength;
+                    canDash = false;
+                }else{
+                    angle_Velocity = -47 / chainLength;
+                    canDash = false;
+                }
             }
-        }
+        }else {
+            if (isPressed[2] && !isPressed[1]) {
+                unit_Velocity.Velocity_X = 9;
+            } else if (isPressed[1] && !isPressed[2]) {
+                unit_Velocity.Velocity_X = -9;
+            } else {
+                unit_Velocity.Velocity_X = 0;
+            }
 
-        unit_Point.x += unit_Velocity.Velocity_X;
-        unit_Velocity.Velocity_Y += pGravity;
-        if (unit_Velocity.Velocity_Y >= 40){
-            unit_Velocity.Velocity_Y = 40;
+            if (isPressed[0]) {
+                if (canJump) {
+                    unit_Velocity.Velocity_Y = -25;
+                    canJump = false;
+                }
+            }
+
+            unit_Point.x += unit_Velocity.Velocity_X;
+            unit_Velocity.Velocity_Y += pGravity;
+            if (unit_Velocity.Velocity_Y >= 40) {
+                unit_Velocity.Velocity_Y = 40;
+            }
+            unit_Point.y += unit_Velocity.Velocity_Y;
         }
-        unit_Point.y += unit_Velocity.Velocity_Y;
     }
 
-    public void setSwing(double pHook_X,double pHook_Y, double pChainLength,double pAngle){
+    public void swing(double pGravity){
+        double angle_Acceleration = (pGravity * Math.cos(angle)) / chainLength;
 
+        angle_Velocity += angle_Acceleration;
+        angle_Velocity *= 0.98;
+        angle += angle_Velocity;
+
+        unit_Point.x = hook_X + chainLength * Math.cos(angle);
+        unit_Point.y = hook_Y + chainLength * Math.sin(angle);
+    }
+
+    public Point getHookPoint(){
+        Point p = new Point(hook_X,hook_Y);
+        return p;
+    }
+
+    public boolean getisHooked(){
+        return isHooked;
     }
 }

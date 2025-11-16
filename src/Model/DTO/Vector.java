@@ -4,7 +4,7 @@ public class Vector {
     double Vector_X, Vector_Y;
     double speed;
 
-    Vector(double pVector_X, double pVector_Y, double pSpeed){
+    public Vector(double pVector_X, double pVector_Y, double pSpeed){
         Vector_X = pVector_X;
         Vector_Y = pVector_Y;
         speed = pSpeed;
