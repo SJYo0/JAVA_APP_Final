@@ -146,22 +146,22 @@ public class gamePanel extends JPanel implements ActionListener {
 
         g.drawImage(BackgroundImage, 0, 0, w, h, this);
 
-        for (int i = 0; i < nowStage.get(0).length; i++) {
-            g.drawImage(nowStage.get(0)[i].image,
-                    (int) nowStage.get(0)[i].getObject_Point().x,
-                    (int) nowStage.get(0)[i].getObject_Point().y,
-                    nowStage.get(0)[i].getObject_Size().width,
-                    nowStage.get(0)[i].getObject_Size().height,
-                    this
-                    );
-        }
-
         for (int i =0; i<nowObstacle.get(0).length; i++){
             g.drawImage(nowObstacle.get(0)[i].image,
                     (int) nowObstacle.get(0)[i].getObject_Point().x,
                     (int) nowObstacle.get(0)[i].getObject_Point().y,
                     nowObstacle.get(0)[i].getObject_Size().width,
                     nowObstacle.get(0)[i].getObject_Size().height,
+                    this
+            );
+        }
+
+        for (int i = 0; i < nowStage.get(0).length; i++) {
+            g.drawImage(nowStage.get(0)[i].image,
+                    (int) nowStage.get(0)[i].getObject_Point().x,
+                    (int) nowStage.get(0)[i].getObject_Point().y,
+                    nowStage.get(0)[i].getObject_Size().width,
+                    nowStage.get(0)[i].getObject_Size().height,
                     this
                     );
         }
