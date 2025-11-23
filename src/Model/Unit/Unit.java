@@ -19,8 +19,16 @@ public class Unit {
         return unit_Point;
     }
 
-    public Size getUnit_Size(){
-        return unit_Size;
+    public void setUnit_Point(Point pPoint){
+        unit_Point.x = pPoint.x;
+        unit_Point.y = pPoint.y;
+    }
+
+    public Size getUnit_Size(){ return unit_Size; }
+
+    public void setUnit_Size(Size pSize){
+        unit_Size.width = pSize.width;
+        unit_Size.height = pSize.height;
     }
 
     public void setUnit_Velocity(double pVelocity_X, double pVelocity_Y){

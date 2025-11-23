@@ -3,6 +3,7 @@ package View;
 import Model.DTO.Point;
 import Model.DTO.Size;
 import Model.MapObject.Land;
+import Model.MapObject.Obstacle;
 import Model.MapObject.gameMap;
 import Model.Unit.Player;
 
@@ -17,16 +18,13 @@ import java.util.ArrayList;
 
 public class gamePanel extends JPanel implements ActionListener {
 
-    private final double GRAVITY = 2;
+    private final double GRAVITY = 1.3;
     private Player player;
     private ArrayList<Land[]> nowStage;
+    private ArrayList<Obstacle[]> nowObstacle;
     private gameMap map;
     private Timer t;
-    private int w,h;
-
-    private boolean drawPlayer;
-    double hook_rangeX,hook_rangeY;
-    int hooK_rangeW,hooK_rangeH;
+    private int w,h, renderRange = 200;
 
     private BufferedImage BackgroundImage;
 
@@ -39,16 +37,27 @@ public class gamePanel extends JPanel implements ActionListener {
             System.out.println(e);
         }
 
-        w = 1920;
-        h = 1080;
+        w = 1080;
+        h = 720;
+        setSize(w,h);
 
         setFocusable(true);
         t = new Timer(16, this);
 
         map = new gameMap();
         nowStage = map.getMap();
+        nowObstacle = map.getMapObstacle();
+        map.setSize(w,h);
+        map.setStartPoint(w,h);
+        map.setPlayerSize(w,h);
 
-        player = new Player(120,850,60,60);
+
+
+        player = new Player(
+                (int)(w/16),
+                (int)(h/1.27),
+                (int)(w/32),
+                (int)(h/18));
 
         addKeyListener(new KeyListener() {
             @Override
@@ -60,14 +69,20 @@ public class gamePanel extends JPanel implements ActionListener {
                 if(e.getKeyCode() == KeyEvent.VK_P){
                     w = getWidth();
                     h = getHeight();
+
                     map.setSize(w,h);
+                    map.setStartPoint(w,h);
+                    map.setPlayerSize(w,h);
                     nowStage = map.getMap();
 
-                    player = new Player(
-                            (int)(w/16),
-                            (int)(h/1.27),
-                            (int)(w/32),
-                            (int)(h/18));
+                    player.setUnit_Point(map.getStartPoint().get(0));
+                    player.setUnit_Size(map.getPlayerSize().get(0));
+
+                    repaint();
+                }
+                else if(e.getKeyCode() == KeyEvent.VK_R){
+                    player.setUnit_Point(map.getStartPoint().get(0));
+                    player.setUnit_Size(map.getPlayerSize().get(0));
 
                     repaint();
                 }
@@ -99,63 +114,31 @@ public class gamePanel extends JPanel implements ActionListener {
             public void mouseExited(MouseEvent e) {}
         });
 
-        drawPlayer = true;
         repaint();
         t.start();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        drawPlayer = false;
-        if(player.getisHooked()){
-            hook_rangeX = (player.getUnit_Point().x + player.getHookPoint().x)/2 - 100;
-            hook_rangeY = (player.getUnit_Point().y + player.getHookPoint().y)/2 - 100;
-            hooK_rangeW = (int)Math.abs(player.getUnit_Point().x - player.getHookPoint().x);
-            hooK_rangeH = (int)Math.abs(player.getUnit_Point().y - player.getHookPoint().y);
-
-            repaint(
-                    (int)hook_rangeX - hooK_rangeW/2,
-                    (int)hook_rangeY - hooK_rangeH/2,
-                    hooK_rangeW + 200,
-                    hooK_rangeH + 200
-            );
-        }
-        else {
-            repaint(
-                    (int) player.getUnit_Point().x,
-                    (int) player.getUnit_Point().y,
-                    player.getUnit_Size().width + 1,
-                    player.getUnit_Size().height + 1
-            );
-        }
-
         player.move(GRAVITY);
         for(int i=0; i<nowStage.get(0).length;i++){
+            if (Math.abs(player.getUnit_Point().x - nowStage.get(0)[i].getObject_Point().x) > renderRange)
+                if(Math.abs(player.getUnit_Point().y - nowStage.get(0)[i].getObject_Point().y) > renderRange)
+                    continue;
+
             player.isInterfere_Object(nowStage.get(0)[i].getObject_Point(), nowStage.get(0)[i].getObject_Size());
         }
+        for(int i=0;i<nowObstacle.get(0).length;i++){
+            if(Math.abs(player.getUnit_Point().x - nowObstacle.get(0)[i].getObject_Point().x) > renderRange)
+                if(Math.abs(player.getUnit_Point().y - nowObstacle.get(0)[i].getObject_Point().y) > renderRange)
+                    continue;
 
-        drawPlayer=true;
-        if(player.getisHooked()){
-            hook_rangeX = (player.getUnit_Point().x + player.getHookPoint().x)/2 - 100;
-            hook_rangeY = (player.getUnit_Point().y + player.getHookPoint().y)/2 - 100;
-            hooK_rangeW = (int)Math.abs(player.getUnit_Point().x - player.getHookPoint().x);
-            hooK_rangeH = (int)Math.abs(player.getUnit_Point().y - player.getHookPoint().y);
+            if(nowObstacle.get(0)[i].interfere(player.getUnit_Point(),player.getUnit_Size())){
+                player.setUnit_Point(map.getStartPoint().get(0));
+            }
+        }
 
-            repaint(
-                    (int)hook_rangeX - hooK_rangeW/2,
-                    (int)hook_rangeY - hooK_rangeH/2,
-                    hooK_rangeW + 200,
-                    hooK_rangeH + 200
-            );
-        }
-        else {
-            repaint(
-                    (int) player.getUnit_Point().x,
-                    (int) player.getUnit_Point().y,
-                    player.getUnit_Size().width + 1,
-                    player.getUnit_Size().height + 1
-            );
-        }
+        repaint();
     }
 
     protected void paintComponent(Graphics g) {
@@ -170,27 +153,35 @@ public class gamePanel extends JPanel implements ActionListener {
                     nowStage.get(0)[i].getObject_Size().width,
                     nowStage.get(0)[i].getObject_Size().height,
                     this
-            );
+                    );
         }
 
-        if (drawPlayer) {
-            g.drawImage(player.image,
-                    (int) player.getUnit_Point().x,
-                    (int) player.getUnit_Point().y,
-                    player.getUnit_Size().width,
-                    player.getUnit_Size().height,
+        for (int i =0; i<nowObstacle.get(0).length; i++){
+            g.drawImage(nowObstacle.get(0)[i].image,
+                    (int) nowObstacle.get(0)[i].getObject_Point().x,
+                    (int) nowObstacle.get(0)[i].getObject_Point().y,
+                    nowObstacle.get(0)[i].getObject_Size().width,
+                    nowObstacle.get(0)[i].getObject_Size().height,
                     this
-            );
+                    );
+        }
 
-            if (player.getisHooked()) {
-                g.setColor(Color.YELLOW);
-                g.drawLine(
-                        (int) player.getUnit_Point().x + player.getUnit_Size().width / 2,
-                        (int) player.getUnit_Point().y + player.getUnit_Size().height / 2,
-                        (int) player.getHookPoint().x,
-                        (int) player.getHookPoint().y
-                );
-            }
+        g.drawImage(player.image,
+                (int) player.getUnit_Point().x,
+                (int) player.getUnit_Point().y,
+                player.getUnit_Size().width,
+                player.getUnit_Size().height,
+                this
+        );
+
+        if (player.getisHooked()) {
+            g.setColor(Color.YELLOW);
+            g.drawLine(
+                    (int) player.getUnit_Point().x + player.getUnit_Size().width / 2,
+                    (int) player.getUnit_Point().y + player.getUnit_Size().height / 2,
+                    (int) player.getHookPoint().x,
+                    (int) player.getHookPoint().y
+            );
         }
     }
 }
