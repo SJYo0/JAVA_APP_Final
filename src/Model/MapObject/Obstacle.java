@@ -4,13 +4,15 @@ import Model.DTO.Point;
 import Model.DTO.Size;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
 public class Obstacle extends MapObject {
     private int radius;
-    public BufferedImage image = null;
+    public BufferedImage originalImage = null;
+    public Image image = null;
 
     Obstacle(int pX,int pY, int pRange){
         super(new Point(pX,pY),new Size(pRange,pRange));
@@ -19,10 +21,12 @@ public class Obstacle extends MapObject {
         String imagePath = "/Model/image/object/obstacle/obstacle.png";
 
         try (InputStream read_path = getClass().getResourceAsStream(imagePath)) {
-            image = ImageIO.read(read_path);
+            originalImage = ImageIO.read(read_path);
         } catch (IOException e) {
             System.out.println(e);
         }
+
+        image = originalImage.getScaledInstance(pRange, pRange, Image.SCALE_SMOOTH);
     }
 
     public boolean interfere(Point pPoint, Size pSize){
@@ -30,7 +34,7 @@ public class Obstacle extends MapObject {
         double dy = (pPoint.y+(pSize.height/2)) - (object_Point.y + radius);
         double length = Math.sqrt(dx*dx + dy*dy);
 
-        if(length <= radius+pSize.width/2){
+        if(length <= radius){
             return true;
         }
         else{

@@ -15,19 +15,27 @@ public class gameMap {
     private int w,h;
 
     public gameMap(){
-        setSize(1080,720);
-        setStartPoint(1080,720);
-//        lands = new Land[8];
-//        lands[0] = new Land(100,900,300,30);
-//        lands[1] = new Land(500,780,300,30);
-//        lands[2] = new Land(100,660,300,30);
-//        lands[3] = new Land(500,540,300,30);
-//        lands[4] = new Land(900,150,100,90);
-//        lands[5] = new Land(1100,540,300,30);
-//        lands[6] = new Land(1500,150,100,90);
-//        lands[7] = new Land(1700,540,300,30);
-//
-//        map.add(lands);
+        lands = new Land[9];
+        lands[0] = new Land(75,683,206,28);
+        lands[1] = new Land(375,607,206,28);
+        lands[2] = new Land(75,532,206,28);
+        lands[3] = new Land(375,455,206,28);
+        lands[4] = new Land(676,114,75,68);
+        lands[5] = new Land(828,455,206,28);
+        lands[6] = new Land(1125,114,75,68);
+        lands[7] = new Land(1286,455,206,28);
+        lands[8] = new Land(75,432,48,117);
+
+        map.add(lands);
+
+        obstacles = new Obstacle[2];
+        obstacles[0] = new Obstacle(676,155,80);
+        obstacles[1] = new Obstacle(676,410,80);
+
+        mapObstacle.add(0,obstacles);
+
+        Point p = new Point(90,607);
+        startPoint.add(0,p);
     }
 
     public ArrayList<Land[]> getMap(){
@@ -35,11 +43,13 @@ public class gameMap {
     }
     public ArrayList<Obstacle[]> getMapObstacle() {return mapObstacle;}
 
-    public void setSize(int pWidth, int pHeight){
+    /*public void setSize(int pWidth, int pHeight){
         w = pWidth;
         h = pHeight;
 
-        lands = new Land[9];
+        System.out.println(w + "  "+ h);
+
+        *//*lands = new Land[9];
         lands[0] = new Land((int)(w/19.2),(int)(h/1.2),(int)(w/7),(int)(h/36));
         lands[1] = new Land((int)(w/3.84),(int)(h/1.35),(int)(w/7),(int)(h/36));
         lands[2] = new Land((int)(w/19.2),(int)(h/1.54),(int)(w/7),(int)(h/36));
@@ -50,36 +60,24 @@ public class gameMap {
         lands[7] = new Land((int)(w/1.12),(int)(h/1.8),(int)(w/7),(int)(h/36));
         lands[8] = new Land((int)(w/19.2),(int)(h/1.9),(int)(w/30),(int)(h/7));
 
-        map.add(0,lands);
+        map.add(0,lands);*//*
 
         obstacles = new Obstacle[2];
         obstacles[0] = new Obstacle((int)(w/2.13),(int)(h/5.3),60);
         obstacles[1] = new Obstacle((int)(w/2.13),(int)(h/2),60);
 
         mapObstacle.add(0,obstacles);
-    }
+    }*/
 
-    public void setStartPoint(int pWidth, int pHeight){
+    /*public void setStartPoint(int pWidth, int pHeight){
         w = pWidth;
         h = pHeight;
 
         Point p = new Point((int)(w/16),(int)(h/1.35));
         startPoint.add(0,p);
-    }
+    }*/
 
     public ArrayList<Point> getStartPoint(){
         return startPoint;
-    }
-
-    public void setPlayerSize(int pWidth, int pHeight){
-        w = pWidth;
-        h = pHeight;
-
-        Size s = new Size((int)(w/32),(int)(h/18));
-        playerSize.add(0,s);
-    }
-
-    public  ArrayList<Size> getPlayerSize(){
-        return playerSize;
     }
 }

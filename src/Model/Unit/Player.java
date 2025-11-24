@@ -6,6 +6,7 @@ import Model.DTO.Vector;
 import Model.MapObject.Land;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -25,7 +26,8 @@ public class Player extends Unit {
     private boolean canDash = false;
     private boolean isDashed = false;
 
-    public BufferedImage image = null;
+    public BufferedImage originalImage = null;
+    public Image image = null;
 
     public Player(double pX, double pY, int pWidth, int pHeight){
         super(new Point(pX,pY),new Size(pWidth,pHeight));
@@ -34,10 +36,12 @@ public class Player extends Unit {
 
         // 상대경로로 읽어주는 클래스
         try (InputStream read_path = getClass().getResourceAsStream(imagePath)) {
-            image = ImageIO.read(read_path);
+            originalImage = ImageIO.read(read_path);
         } catch (IOException e) {
             System.out.println(e);
         }
+
+        image = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
     }
 
     public void keyPressed(KeyEvent e){
@@ -73,7 +77,7 @@ public class Player extends Unit {
         chainLength = Math.sqrt(dx*dx + dy*dy);
         angle = Math.atan2(dy,dx);
 
-        angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 2.2;
+        angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 3;
     }
 
     public void mouseReleased(MouseEvent e) {
@@ -137,9 +141,9 @@ public class Player extends Unit {
             }
         }else {
             if (isPressed[2] && !isPressed[1]) {
-                unit_Velocity.Velocity_X = 7.5;
+                unit_Velocity.Velocity_X = 5;
             } else if (isPressed[1] && !isPressed[2]) {
-                unit_Velocity.Velocity_X = -7.5;
+                unit_Velocity.Velocity_X = -5;
             } else {
                 unit_Velocity.Velocity_X = 0;
             }
@@ -164,7 +168,7 @@ public class Player extends Unit {
         double angle_Acceleration = (pGravity * Math.cos(angle)) / chainLength;
 
         angle_Velocity += angle_Acceleration;
-        angle_Velocity *= 0.99;
+        angle_Velocity *= 0.98;
         angle += angle_Velocity;
 
         unit_Point.x = hook_X + chainLength * Math.cos(angle);

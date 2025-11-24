@@ -18,7 +18,7 @@ import java.util.ArrayList;
 
 public class gamePanel extends JPanel implements ActionListener {
 
-    private final double GRAVITY = 1.3;
+    private final double GRAVITY = 1;
     private Player player;
     private ArrayList<Land[]> nowStage;
     private ArrayList<Obstacle[]> nowObstacle;
@@ -27,6 +27,13 @@ public class gamePanel extends JPanel implements ActionListener {
     private int w,h, renderRange = 200;
 
     private BufferedImage BackgroundImage;
+    private Image image;
+
+    // -------------------------실험-----------------
+    long lastTime = System.currentTimeMillis();
+    int frames = 0;
+    // --------------------------------------------
+
 
     gamePanel(){
         String imagePath = "/Model/image/object/background/sky.png";
@@ -37,9 +44,9 @@ public class gamePanel extends JPanel implements ActionListener {
             System.out.println(e);
         }
 
-        w = 1080;
-        h = 720;
-        setSize(w,h);
+        setSize(1440,820);
+
+        image = BackgroundImage.getScaledInstance(1440, 820, Image.SCALE_SMOOTH);
 
         setFocusable(true);
         t = new Timer(16, this);
@@ -47,17 +54,8 @@ public class gamePanel extends JPanel implements ActionListener {
         map = new gameMap();
         nowStage = map.getMap();
         nowObstacle = map.getMapObstacle();
-        map.setSize(w,h);
-        map.setStartPoint(w,h);
-        map.setPlayerSize(w,h);
 
-
-
-        player = new Player(
-                (int)(w/16),
-                (int)(h/1.27),
-                (int)(w/32),
-                (int)(h/18));
+        player = new Player(90, 645,45,45);
 
         addKeyListener(new KeyListener() {
             @Override
@@ -66,25 +64,8 @@ public class gamePanel extends JPanel implements ActionListener {
             @Override
             public void keyPressed(KeyEvent e) {
                 player.keyPressed(e);
-                if(e.getKeyCode() == KeyEvent.VK_P){
-                    w = getWidth();
-                    h = getHeight();
-
-                    map.setSize(w,h);
-                    map.setStartPoint(w,h);
-                    map.setPlayerSize(w,h);
-                    nowStage = map.getMap();
-
+                if(e.getKeyCode() == KeyEvent.VK_R){
                     player.setUnit_Point(map.getStartPoint().get(0));
-                    player.setUnit_Size(map.getPlayerSize().get(0));
-
-                    repaint();
-                }
-                else if(e.getKeyCode() == KeyEvent.VK_R){
-                    player.setUnit_Point(map.getStartPoint().get(0));
-                    player.setUnit_Size(map.getPlayerSize().get(0));
-
-                    repaint();
                 }
             }
 
@@ -144,14 +125,12 @@ public class gamePanel extends JPanel implements ActionListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.drawImage(BackgroundImage, 0, 0, w, h, this);
+        g.drawImage(image, 0, 0, this);
 
         for (int i =0; i<nowObstacle.get(0).length; i++){
             g.drawImage(nowObstacle.get(0)[i].image,
                     (int) nowObstacle.get(0)[i].getObject_Point().x,
                     (int) nowObstacle.get(0)[i].getObject_Point().y,
-                    nowObstacle.get(0)[i].getObject_Size().width,
-                    nowObstacle.get(0)[i].getObject_Size().height,
                     this
             );
         }
@@ -160,8 +139,6 @@ public class gamePanel extends JPanel implements ActionListener {
             g.drawImage(nowStage.get(0)[i].image,
                     (int) nowStage.get(0)[i].getObject_Point().x,
                     (int) nowStage.get(0)[i].getObject_Point().y,
-                    nowStage.get(0)[i].getObject_Size().width,
-                    nowStage.get(0)[i].getObject_Size().height,
                     this
                     );
         }
@@ -169,8 +146,6 @@ public class gamePanel extends JPanel implements ActionListener {
         g.drawImage(player.image,
                 (int) player.getUnit_Point().x,
                 (int) player.getUnit_Point().y,
-                player.getUnit_Size().width,
-                player.getUnit_Size().height,
                 this
         );
 
@@ -183,5 +158,14 @@ public class gamePanel extends JPanel implements ActionListener {
                     (int) player.getHookPoint().y
             );
         }
+        // AI 제안 실험----------------------------------
+        // FPS 계산 로직
+        frames++;
+        if (System.currentTimeMillis() - lastTime >= 1000) {
+            System.out.println("FPS: " + frames); // 콘솔에 출력
+            frames = 0;
+            lastTime = System.currentTimeMillis();
+        }
+        //-------------------------------------
     }
 }
