@@ -9,10 +9,8 @@ public class gameMap {
     private ArrayList<Land[]> map = new ArrayList<>();
     private ArrayList<Obstacle[]> mapObstacle = new ArrayList<>();
     private ArrayList<Point> startPoint = new ArrayList<>();
-    private ArrayList<Size> playerSize = new ArrayList<>();
     private Land[] lands;
     private Obstacle[] obstacles;
-    private int w,h;
 
     public gameMap(){
         lands = new Land[9];

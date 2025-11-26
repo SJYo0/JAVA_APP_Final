@@ -24,7 +24,7 @@ public class gamePanel extends JPanel implements ActionListener {
     private ArrayList<Obstacle[]> nowObstacle;
     private gameMap map;
     private Timer t;
-    private int w,h, renderRange = 200;
+    private int renderRange = 200;
 
     private BufferedImage BackgroundImage;
     private Image image;

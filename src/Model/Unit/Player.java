@@ -20,7 +20,6 @@ public class Player extends Unit {
     private double chainLength;
     private double angle;
     private double angle_Velocity;
-    private Vector playerVector;
     private boolean canJump = false;
     private boolean isPressed[] = {false,false,false};
     private boolean canDash = false;
