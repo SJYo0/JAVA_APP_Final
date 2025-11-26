@@ -30,8 +30,8 @@ public class gamePanel extends JPanel implements ActionListener {
     private Image image;
 
     // -------------------------실험-----------------
-    long lastTime = System.currentTimeMillis();
-    int frames = 0;
+    /*long lastTime = System.currentTimeMillis();
+    int frames = 0;*/
     // --------------------------------------------
 
 
@@ -160,12 +160,12 @@ public class gamePanel extends JPanel implements ActionListener {
         }
         // AI 제안 실험----------------------------------
         // FPS 계산 로직
-        frames++;
+        /*frames++;
         if (System.currentTimeMillis() - lastTime >= 1000) {
             System.out.println("FPS: " + frames); // 콘솔에 출력
             frames = 0;
             lastTime = System.currentTimeMillis();
-        }
+        }*/
         //-------------------------------------
     }
 }
