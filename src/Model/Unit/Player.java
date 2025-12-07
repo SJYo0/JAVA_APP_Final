@@ -22,8 +22,10 @@ public class Player extends Unit {
     private double angle_Velocity;
     private boolean canJump = false;
     private boolean isPressed[] = {false,false,false};
+    private boolean isMousePressed[] = {false,false};
     private boolean canDash = false;
     private boolean isDashed = false;
+    private boolean isGrapObject = false;
 
     public BufferedImage originalImage = null;
     public Image image = null;
@@ -62,33 +64,48 @@ public class Player extends Unit {
             isPressed[1] = false;
         else if((e.getKeyCode() == KeyEvent.VK_W) || (e.getKeyCode() == KeyEvent.VK_SPACE))
             isPressed[0] = false;
+
+        isGrapObject = false;
     }
 
     public void mousePressed(MouseEvent e){
-        isHooked = true;
-        canDash = true;
-        canJump = false;
-        hook_X = e.getX();
-        hook_Y = e.getY();
+        if(e.getButton() == MouseEvent.BUTTON1) {
+            isMousePressed[0] = true;
 
-        double dx = unit_Point.x - hook_X;
-        double dy = unit_Point.y - hook_Y;
-        chainLength = Math.sqrt(dx*dx + dy*dy);
-        angle = Math.atan2(dy,dx);
+            isHooked = true;
+            canDash = true;
+            canJump = false;
+            hook_X = e.getX();
+            hook_Y = e.getY();
 
-        angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 3;
+            double dx = unit_Point.x - hook_X;
+            double dy = unit_Point.y - hook_Y;
+            chainLength = Math.sqrt(dx * dx + dy * dy);
+            angle = Math.atan2(dy, dx);
+
+            angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 3;
+        }
+        else if(e.getButton()==MouseEvent.BUTTON3){
+            isMousePressed[1] = true;
+        }
     }
 
     public void mouseReleased(MouseEvent e) {
-        isHooked = false;
-        isDashed = false;
-        double speed = angle_Velocity * chainLength;
-        double xVector = -Math.sin(angle);
-        double yVector = Math.cos(angle);
+        if(e.getButton()==MouseEvent.BUTTON1) {
+            isMousePressed[0] = false;
 
-        unit_Velocity.Velocity_X = xVector * speed;
-        unit_Velocity.Velocity_Y = yVector * speed;
+            isHooked = false;
+            isDashed = false;
+            double speed = angle_Velocity * chainLength;
+            double xVector = -Math.sin(angle);
+            double yVector = Math.cos(angle);
 
+            unit_Velocity.Velocity_X = xVector * speed;
+            unit_Velocity.Velocity_Y = yVector * speed;
+        }
+        else if(e.getButton()==MouseEvent.BUTTON3){
+            isMousePressed[1] = false;
+        }
     }
 
     public void isInterfere_Object(Point pPoint, Size pSize){
@@ -109,16 +126,21 @@ public class Player extends Unit {
             if (overlapX < overlapY) {  // X축쪽이 적게 겹쳐서 X축으로 밀어냄
                 if (dx > 0) { // 오른쪽으로 적게 겹쳤다면
                     unit_Point.x = pPoint.x + pSize.width; // 오른쪽으로 밀어냄
+                    isGrapObject = true;
+                    canJump = true;
                 } else { // 왼쪽으로 적게 겹쳤다면
                     unit_Point.x = pPoint.x - unit_Size.width; // 왼쪽으로 밀어냄
+                    isGrapObject = true;
+                    canJump = true;
                 }
                 unit_Velocity.Velocity_X = 0;
             } else { // Y축으로 밀어내기
                 if (dy > 0) { // 아래쪽으로 적게 겹침
-                    unit_Point.y = pPoint.y + pSize.height; // 아래쪽으로 밀어냄
+                    unit_Point.y = pPoint.y + pSize.height;
                     unit_Velocity.Velocity_Y = 0;
+                    isGrapObject = true;
                 } else { // 위쪽으로 적게 겹침
-                    unit_Point.y = pPoint.y - unit_Size.height; // 위쪽으로 밀어냄
+                    unit_Point.y = pPoint.y - unit_Size.height;
                     unit_Velocity.Velocity_Y = 0;
                     canJump = true; // 점프 가능
                 }
@@ -127,6 +149,8 @@ public class Player extends Unit {
     }
 
     public void move(double pGravity){
+
+
         if (isHooked){
             swing(pGravity);
             if(canDash && isDashed){
@@ -138,7 +162,12 @@ public class Player extends Unit {
                     canDash = false;
                 }
             }
-        }else {
+        }
+        else if(isGrapObject){
+            unit_Velocity.Velocity_X = 0;
+            unit_Velocity.Velocity_Y = 0;
+        }
+        else {
             if (isPressed[2] && !isPressed[1]) {
                 unit_Velocity.Velocity_X = 5;
             } else if (isPressed[1] && !isPressed[2]) {
@@ -163,7 +192,7 @@ public class Player extends Unit {
         }
     }
 
-    public void swing(double pGravity){
+    private void swing(double pGravity){
         double angle_Acceleration = (pGravity * Math.cos(angle)) / chainLength;
 
         angle_Velocity += angle_Acceleration;
