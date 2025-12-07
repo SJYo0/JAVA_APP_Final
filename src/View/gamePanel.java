@@ -6,6 +6,7 @@ import Model.MapObject.Land;
 import Model.MapObject.Obstacle;
 import Model.MapObject.gameMap;
 import Model.Unit.Player;
+import Model.Utility.Camera;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -18,13 +19,18 @@ import java.util.ArrayList;
 
 public class gamePanel extends JPanel implements ActionListener {
 
+    private gameFrame frame;
     private final double GRAVITY = 1;
     private Player player;
     private ArrayList<Land[]> nowStage;
     private ArrayList<Obstacle[]> nowObstacle;
+
     private gameMap map;
     private Timer t;
     private int renderRange = 200;
+    private int stageNum;
+    private double click_x, click_y;
+    private Camera camera;
 
     private BufferedImage BackgroundImage;
     private Image image;
@@ -35,7 +41,10 @@ public class gamePanel extends JPanel implements ActionListener {
     // --------------------------------------------
 
 
-    gamePanel(){
+    gamePanel(gameFrame pFrame, int pStageNum, stagePanel pPanel){
+        frame = pFrame;
+        stageNum = pStageNum;
+
         String imagePath = "/Model/image/object/background/sky.png";
 
         try (InputStream read_path = getClass().getResourceAsStream(imagePath)) {
@@ -55,7 +64,13 @@ public class gamePanel extends JPanel implements ActionListener {
         nowStage = map.getMap();
         nowObstacle = map.getMapObstacle();
 
+
         player = new Player(90, 645,45,45);
+
+        camera = new Camera();
+        Size s = new Size(1440,820);
+        camera.setPanelSize(s);
+        camera.setMapSize(map.getMapSize().get(stageNum));
 
         addKeyListener(new KeyListener() {
             @Override
@@ -65,7 +80,10 @@ public class gamePanel extends JPanel implements ActionListener {
             public void keyPressed(KeyEvent e) {
                 player.keyPressed(e);
                 if(e.getKeyCode() == KeyEvent.VK_R){
-                    player.setUnit_Point(map.getStartPoint().get(0));
+                    player.setUnit_Point(map.getStartPoint().get(stageNum));
+                }
+                if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    frame.changePanel(pPanel);
                 }
             }
 
@@ -78,6 +96,10 @@ public class gamePanel extends JPanel implements ActionListener {
         addMouseListener(new MouseListener() {
             @Override
             public void mousePressed(MouseEvent e) {
+                click_x = e.getX() + camera.getCameraPoint().x;
+                click_y = e.getY() + camera.getCameraPoint().y;
+                checkCanHook();
+
                 player.mousePressed(e);
             }
 
@@ -99,25 +121,33 @@ public class gamePanel extends JPanel implements ActionListener {
         t.start();
     }
 
+    public void checkCanHook(){
+        for(int i=0; i<nowStage.get(stageNum).length;i++){
+            player.canHook(nowStage.get(stageNum)[i].getObject_Point(), nowStage.get(stageNum)[i].getObject_Size(),click_x,click_y);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         player.move(GRAVITY);
-        for(int i=0; i<nowStage.get(0).length;i++){
-            if (Math.abs(player.getUnit_Point().x - nowStage.get(0)[i].getObject_Point().x) > renderRange)
-                if(Math.abs(player.getUnit_Point().y - nowStage.get(0)[i].getObject_Point().y) > renderRange)
+        for(int i=0; i<nowStage.get(stageNum).length;i++){
+            if (Math.abs(player.getUnit_Point().x - nowStage.get(stageNum)[i].getObject_Point().x) > renderRange)
+                if(Math.abs(player.getUnit_Point().y - nowStage.get(stageNum)[i].getObject_Point().y) > renderRange)
                     continue;
 
-            player.isInterfere_Object(nowStage.get(0)[i].getObject_Point(), nowStage.get(0)[i].getObject_Size());
+            player.isInterfere_Object(nowStage.get(stageNum)[i].getObject_Point(), nowStage.get(stageNum)[i].getObject_Size());
         }
-        for(int i=0;i<nowObstacle.get(0).length;i++){
-            if(Math.abs(player.getUnit_Point().x - nowObstacle.get(0)[i].getObject_Point().x) > renderRange)
-                if(Math.abs(player.getUnit_Point().y - nowObstacle.get(0)[i].getObject_Point().y) > renderRange)
+        for(int i=0;i<nowObstacle.get(stageNum).length;i++){
+            if(Math.abs(player.getUnit_Point().x - nowObstacle.get(stageNum)[i].getObject_Point().x) > renderRange)
+                if(Math.abs(player.getUnit_Point().y - nowObstacle.get(stageNum)[i].getObject_Point().y) > renderRange)
                     continue;
 
-            if(nowObstacle.get(0)[i].interfere(player.getUnit_Point(),player.getUnit_Size())){
-                player.setUnit_Point(map.getStartPoint().get(0));
+            if(nowObstacle.get(stageNum)[i].interfere(player.getUnit_Point(),player.getUnit_Size())){
+                player.setUnit_Point(map.getStartPoint().get(stageNum));
             }
         }
+
+        camera.setCameraPoint(player.getUnit_Point());
 
         repaint();
     }
@@ -127,35 +157,35 @@ public class gamePanel extends JPanel implements ActionListener {
 
         g.drawImage(image, 0, 0, this);
 
-        for (int i =0; i<nowObstacle.get(0).length; i++){
-            g.drawImage(nowObstacle.get(0)[i].image,
-                    (int) nowObstacle.get(0)[i].getObject_Point().x,
-                    (int) nowObstacle.get(0)[i].getObject_Point().y,
+        for (int i =0; i<nowObstacle.get(stageNum).length; i++){
+            g.drawImage(nowObstacle.get(stageNum)[i].image,
+                    (int) nowObstacle.get(stageNum)[i].getObject_Point().x - (int) camera.getCameraPoint().x,
+                    (int) nowObstacle.get(stageNum)[i].getObject_Point().y - (int) camera.getCameraPoint().y,
                     this
             );
         }
 
-        for (int i = 0; i < nowStage.get(0).length; i++) {
-            g.drawImage(nowStage.get(0)[i].image,
-                    (int) nowStage.get(0)[i].getObject_Point().x,
-                    (int) nowStage.get(0)[i].getObject_Point().y,
+        for (int i = 0; i < nowStage.get(stageNum).length; i++) {
+            g.drawImage(nowStage.get(stageNum)[i].image,
+                    (int) nowStage.get(stageNum)[i].getObject_Point().x- (int) camera.getCameraPoint().x,
+                    (int) nowStage.get(stageNum)[i].getObject_Point().y- (int) camera.getCameraPoint().y,
                     this
                     );
         }
 
         g.drawImage(player.image,
-                (int) player.getUnit_Point().x,
-                (int) player.getUnit_Point().y,
+                (int) player.getUnit_Point().x- (int) camera.getCameraPoint().x,
+                (int) player.getUnit_Point().y- (int) camera.getCameraPoint().y,
                 this
         );
 
         if (player.getisHooked()) {
             g.setColor(Color.YELLOW);
             g.drawLine(
-                    (int) player.getUnit_Point().x + player.getUnit_Size().width / 2,
-                    (int) player.getUnit_Point().y + player.getUnit_Size().height / 2,
-                    (int) player.getHookPoint().x,
-                    (int) player.getHookPoint().y
+                    (int) player.getUnit_Point().x + player.getUnit_Size().width / 2- (int) camera.getCameraPoint().x,
+                    (int) player.getUnit_Point().y + player.getUnit_Size().height / 2- (int) camera.getCameraPoint().y,
+                    (int) player.getHookPoint().x- (int) camera.getCameraPoint().x,
+                    (int) player.getHookPoint().y- (int) camera.getCameraPoint().y
             );
         }
         // AI 제안 실험----------------------------------

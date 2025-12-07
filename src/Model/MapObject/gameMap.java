@@ -9,11 +9,16 @@ public class gameMap {
     private ArrayList<Land[]> map = new ArrayList<>();
     private ArrayList<Obstacle[]> mapObstacle = new ArrayList<>();
     private ArrayList<Point> startPoint = new ArrayList<>();
+    private ArrayList<Size> mapSize = new ArrayList<>();
     private Land[] lands;
     private Obstacle[] obstacles;
 
     public gameMap(){
-        lands = new Land[9];
+        // 스테이지 1 세팅 ==========================================
+        Size s = new Size(3000,1500);
+        mapSize.add(s);
+
+        lands = new Land[11];
         lands[0] = new Land(75,683,206,28);
         lands[1] = new Land(375,607,206,28);
         lands[2] = new Land(75,532,206,28);
@@ -23,6 +28,9 @@ public class gameMap {
         lands[6] = new Land(1125,114,75,68);
         lands[7] = new Land(1286,455,206,28);
         lands[8] = new Land(75,432,48,117);
+
+        lands[9] = new Land(1600,455,400,28);
+        lands[10] = new Land(2100,455,400,28);
 
         map.add(lands);
 
@@ -34,12 +42,15 @@ public class gameMap {
 
         Point p = new Point(90,607);
         startPoint.add(0,p);
+        //=================================================================
     }
 
     public ArrayList<Land[]> getMap(){
         return map;
     }
     public ArrayList<Obstacle[]> getMapObstacle() {return mapObstacle;}
+    public ArrayList<Point> getStartPoint(){return startPoint;}
+    public ArrayList<Size> getMapSize() {return mapSize;}
 
     /*public void setSize(int pWidth, int pHeight){
         w = pWidth;
@@ -75,7 +86,5 @@ public class gameMap {
         startPoint.add(0,p);
     }*/
 
-    public ArrayList<Point> getStartPoint(){
-        return startPoint;
-    }
+
 }

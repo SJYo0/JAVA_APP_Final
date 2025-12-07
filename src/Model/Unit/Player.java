@@ -26,6 +26,7 @@ public class Player extends Unit {
     private boolean canDash = false;
     private boolean isDashed = false;
     private boolean isGrapObject = false;
+    private boolean canHook = false;
 
     public BufferedImage originalImage = null;
     public Image image = null;
@@ -72,18 +73,23 @@ public class Player extends Unit {
         if(e.getButton() == MouseEvent.BUTTON1) {
             isMousePressed[0] = true;
 
-            isHooked = true;
-            canDash = true;
-            canJump = false;
-            hook_X = e.getX();
-            hook_Y = e.getY();
+            /*hook_X = e.getX();
+            hook_Y = e.getY();*/
 
             double dx = unit_Point.x - hook_X;
             double dy = unit_Point.y - hook_Y;
             chainLength = Math.sqrt(dx * dx + dy * dy);
-            angle = Math.atan2(dy, dx);
 
-            angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 3;
+            if((chainLength <= 250) && canHook) {
+                isHooked = true;
+                canDash = true;
+                canJump = false;
+                canHook = false;
+
+                angle = Math.atan2(dy, dx);
+
+                angle_Velocity = -unit_Velocity.Velocity_X / chainLength * 3;
+            }
         }
         else if(e.getButton()==MouseEvent.BUTTON3){
             isMousePressed[1] = true;
@@ -93,15 +99,17 @@ public class Player extends Unit {
     public void mouseReleased(MouseEvent e) {
         if(e.getButton()==MouseEvent.BUTTON1) {
             isMousePressed[0] = false;
+            canHook = false;
+            if(isHooked) {
+                isHooked = false;
+                isDashed = false;
+                double speed = angle_Velocity * chainLength;
+                double xVector = -Math.sin(angle);
+                double yVector = Math.cos(angle);
 
-            isHooked = false;
-            isDashed = false;
-            double speed = angle_Velocity * chainLength;
-            double xVector = -Math.sin(angle);
-            double yVector = Math.cos(angle);
-
-            unit_Velocity.Velocity_X = xVector * speed;
-            unit_Velocity.Velocity_Y = yVector * speed;
+                unit_Velocity.Velocity_X = xVector * speed;
+                unit_Velocity.Velocity_Y = yVector * speed;
+            }
         }
         else if(e.getButton()==MouseEvent.BUTTON3){
             isMousePressed[1] = false;
@@ -190,6 +198,16 @@ public class Player extends Unit {
             }
             unit_Point.y += unit_Velocity.Velocity_Y;
         }
+    }
+
+    public void canHook(Point pPoint, Size pSize, double pX, double pY){
+        if((pPoint.x <= pX)&&(pX <= pPoint.x+pSize.width)){
+            if((pPoint.y <= pY)&&(pY <= pPoint.y+pSize.height)){
+                canHook = true;
+            }
+        }
+        hook_X = pX;
+        hook_Y = pY;
     }
 
     private void swing(double pGravity){
