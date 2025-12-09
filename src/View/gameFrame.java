@@ -27,7 +27,7 @@ public class gameFrame extends JFrame {
         nowPanel = pPanel;
         add(nowPanel);
 
-        //revalidate();
+        revalidate();
         repaint();
 
         nowPanel.setFocusable(true);

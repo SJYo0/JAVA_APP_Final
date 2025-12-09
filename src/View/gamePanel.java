@@ -91,6 +91,7 @@ public class gamePanel extends JPanel implements ActionListener {
                     player.setUnit_Point(map.getStartPoint().get(stageNum));
                 }
                 if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
+                    t.stop();
                     frame.changePanel(pPanel);
                 }
             }
@@ -157,6 +158,7 @@ public class gamePanel extends JPanel implements ActionListener {
         }
 
         if(nowGoal.get(stageNum).interfere(player.getUnit_Point(),player.getUnit_Size())){
+            t.stop();
             frame.changePanel(panel);
         }
 
