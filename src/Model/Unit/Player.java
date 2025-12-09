@@ -27,9 +27,16 @@ public class Player extends Unit {
     private boolean isDashed = false;
     private boolean isGrapObject = false;
     private boolean canHook = false;
+    private boolean direction = false;
+    private int count = 0, cut =0, nowMoving=0 ;
 
     public BufferedImage originalImage = null;
     public Image image = null;
+
+    private Image[] stnad = null;
+    private Image[][] move = null;
+    private Image[][] jump = null;
+    private Image[][] swing = null;
 
     public Player(double pX, double pY, int pWidth, int pHeight){
         super(new Point(pX,pY),new Size(pWidth,pHeight));
@@ -44,13 +51,94 @@ public class Player extends Unit {
         }
 
         image = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+
+        loadImage();
+    }
+
+    private void loadImage() {
+        // 일반 이미지
+        String imagePath = "/Model/image/curby.png";
+
+        // 상대경로로 읽어주는 클래스
+        try (InputStream read_path = getClass().getResourceAsStream(imagePath)) {
+            originalImage = ImageIO.read(read_path);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+        stnad = new Image[2];
+
+        stnad[0] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+        stnad[1] = filpImage(stnad[0]);
+
+        move = new Image[2][8];
+        jump = new Image[2][8];
+
+        for(int i=0; i<8; i++){
+            // 일반 이미지
+            String imagePath_1 = "/Model/image/action/move/walking_"+i+".png";
+            String imagePath_2 = "/Model/image/action/jump/jumping_"+i+".png";
+
+            // 상대경로로 읽어주는 클래스
+            try (InputStream read_path = getClass().getResourceAsStream(imagePath_1)) {
+                originalImage = ImageIO.read(read_path);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+            move[0][i] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+            move[1][i] = filpImage(move[0][i]);
+
+
+            try (InputStream read_path = getClass().getResourceAsStream(imagePath_2)) {
+                originalImage = ImageIO.read(read_path);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+            jump[0][i] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+            jump[1][i] = filpImage(jump[0][i]);
+        }
+
+        swing = new Image[2][4];
+
+        for(int i=0;i<4;i++){
+            // 일반 이미지
+            String imagePath_1 = "/Model/image/action/swing/swing_"+i+".png";
+
+            // 상대경로로 읽어주는 클래스
+            try (InputStream read_path = getClass().getResourceAsStream(imagePath_1)) {
+                originalImage = ImageIO.read(read_path);
+            } catch (IOException e) {
+                System.out.println(e);
+            }
+
+            swing[0][i] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+            swing[1][i] = filpImage(swing[0][i]);
+        }
+    }
+
+    private Image filpImage(Image pImage){
+        int w = pImage.getWidth(null);
+        int h = pImage.getHeight(null);
+
+        BufferedImage filpImage = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+        Graphics g = filpImage.createGraphics();
+        g.drawImage(pImage,w,0,-w,h,null);
+        g.dispose();
+
+        return filpImage;
     }
 
     public void keyPressed(KeyEvent e){
-        if (e.getKeyCode() == KeyEvent.VK_D)
+        if (e.getKeyCode() == KeyEvent.VK_D) {
             isPressed[2] = true;
-        else if(e.getKeyCode() == KeyEvent.VK_A)
+            direction = true;
+        }
+        else if(e.getKeyCode() == KeyEvent.VK_A) {
             isPressed[1] = true;
+            direction =false;
+        }
         else if((e.getKeyCode() == KeyEvent.VK_W)|| (e.getKeyCode() == KeyEvent.VK_SPACE))
             isPressed[0] = true;
         else if(e.getKeyCode() == KeyEvent.VK_SHIFT){
@@ -80,7 +168,7 @@ public class Player extends Unit {
             double dy = unit_Point.y - hook_Y;
             chainLength = Math.sqrt(dx * dx + dy * dy);
 
-            if((chainLength <= 250) && canHook) {
+            if((chainLength <= 500) && canHook) {
                 isHooked = true;
                 canDash = true;
                 canJump = false;
@@ -146,7 +234,7 @@ public class Player extends Unit {
                 if (dy > 0) { // 아래쪽으로 적게 겹침
                     unit_Point.y = pPoint.y + pSize.height;
                     unit_Velocity.Velocity_Y = 0;
-                    isGrapObject = true;
+                    //isGrapObject = true;
                 } else { // 위쪽으로 적게 겹침
                     unit_Point.y = pPoint.y - unit_Size.height;
                     unit_Velocity.Velocity_Y = 0;
@@ -156,9 +244,48 @@ public class Player extends Unit {
         }
     }
 
+    private void updateImage(){
+        int nextMoving;
+
+        if((isPressed[1] || isPressed[2]) && canJump && !isHooked){
+            nextMoving = 1;
+        }else if(!canJump && !isHooked){
+            nextMoving =2;
+        }else if(isHooked){
+            nextMoving = 3;
+        }else{
+            nextMoving =0;
+        }
+
+        if(nowMoving != nextMoving){
+            nowMoving = nextMoving;
+            cut =0;
+            count =0;
+        }
+
+        count++;
+        if(count>4){
+            cut++;
+            if(cut>7){
+                cut=0;
+            }
+            count =0;
+        }
+
+        if(direction){
+            if(nowMoving==1) image = move[0][cut];
+            else if(nowMoving==2) image = jump[0][cut];
+            else if(nowMoving == 3) {image = swing[0][cut/2];}
+            else image = stnad[0];
+        }else{
+            if(nowMoving==1) image = move[1][cut];
+            else if(nowMoving==2) image = jump[1][cut];
+            else if(nowMoving == 3) image = swing[1][cut/2];
+            else image = stnad[1];
+        }
+    }
+
     public void move(double pGravity){
-
-
         if (isHooked){
             swing(pGravity);
             if(canDash && isDashed){
@@ -198,6 +325,8 @@ public class Player extends Unit {
             }
             unit_Point.y += unit_Velocity.Velocity_Y;
         }
+
+        updateImage();
     }
 
     public void canHook(Point pPoint, Size pSize, double pX, double pY){
@@ -214,7 +343,7 @@ public class Player extends Unit {
         double angle_Acceleration = (pGravity * Math.cos(angle)) / chainLength;
 
         angle_Velocity += angle_Acceleration;
-        angle_Velocity *= 0.98;
+        angle_Velocity *= 0.995;
         angle += angle_Velocity;
 
         unit_Point.x = hook_X + chainLength * Math.cos(angle);
@@ -228,5 +357,9 @@ public class Player extends Unit {
 
     public boolean getisHooked(){
         return isHooked;
+    }
+
+    public void setisHooked(boolean pBool){
+        isHooked = pBool;
     }
 }
