@@ -108,6 +108,13 @@ public class gamePanel extends JPanel implements ActionListener {
                 player.keyPressed(e);
                 if(e.getKeyCode() == KeyEvent.VK_R){
                     player.setUnit_Point(map.getStartPoint().get(stageNum));
+                    if(stageNum==1) {
+                        Point p = new Point(10, 10);
+                        enemy.setUnit_Point(p);
+                    }else if(stageNum==2){
+                        Point p = new Point(0, 0);
+                        laser.setUnit_Point(p);
+                    }
                 }
                 if(e.getKeyCode() == KeyEvent.VK_ESCAPE){
                     t.stop();
