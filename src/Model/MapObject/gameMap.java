@@ -143,7 +143,7 @@ public class gameMap {
 
         mapGoal.add(goal);
 
-        p = new Point(50,1370);
+        p = new Point(100,1370);
         startPoint.add(p);
 
     }

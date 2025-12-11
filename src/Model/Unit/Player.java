@@ -2,8 +2,6 @@ package Model.Unit;
 
 import Model.DTO.Point;
 import Model.DTO.Size;
-import Model.DTO.Vector;
-import Model.MapObject.Land;
 
 import javax.imageio.ImageIO;
 import java.awt.*;

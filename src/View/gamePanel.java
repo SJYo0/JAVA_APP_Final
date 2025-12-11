@@ -6,7 +6,10 @@ import Model.MapObject.Goal;
 import Model.MapObject.Land;
 import Model.MapObject.Obstacle;
 import Model.MapObject.gameMap;
+import Model.Unit.Enemy;
+import Model.Unit.Laser;
 import Model.Unit.Player;
+import Model.Unit.Target;
 import Model.Utility.Camera;
 
 import javax.imageio.ImageIO;
@@ -26,6 +29,9 @@ public class gamePanel extends JPanel implements ActionListener {
     private ArrayList<Land[]> nowStage;
     private ArrayList<Obstacle[]> nowObstacle;
     private ArrayList<Goal> nowGoal;
+    private Enemy enemy;
+    private Target target;
+    private Laser laser;
 
     private gameMap map;
     private Timer t;
@@ -70,6 +76,19 @@ public class gamePanel extends JPanel implements ActionListener {
         nowObstacle = map.getMapObstacle();
         nowGoal = map.getMapGoal();
 
+        if(stageNum==1){
+            Point p = new Point(10,10);
+            Size s = new Size(100,100);
+            enemy = new Enemy(p,s);
+
+            p = new Point(10,10);
+            s = new Size(2,2);
+            target = new Target(p,s);
+        }else if(stageNum==2){
+            Point p = new Point(0,0);
+            Size s = new Size(20,1500);
+            laser = new Laser(p,s);
+        }
 
         player = new Player(0, 0,45,45);
 
@@ -139,6 +158,15 @@ public class gamePanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         player.move(GRAVITY);
+
+        if(stageNum==1) {
+            target.move(player.getUnit_Point());
+            enemy.move(target.getUnit_Point());
+        }else if(stageNum==2){
+            laser.move();
+        }
+
+        // 지형 겹침 검사
         for(int i=0; i<nowStage.get(stageNum).length;i++){
 //            if (Math.abs(player.getUnit_Point().x - nowStage.get(stageNum)[i].getObject_Point().x) > renderRange)
 //                if(Math.abs(player.getUnit_Point().y - nowStage.get(stageNum)[i].getObject_Point().y) > renderRange)
@@ -146,6 +174,8 @@ public class gamePanel extends JPanel implements ActionListener {
 
             player.isInterfere_Object(nowStage.get(stageNum)[i].getObject_Point(), nowStage.get(stageNum)[i].getObject_Size());
         }
+
+        // 장애물 충돌 검사
         for(int i=0;i<nowObstacle.get(stageNum).length;i++){
 //            if(Math.abs(player.getUnit_Point().x - nowObstacle.get(stageNum)[i].getObject_Point().x) > renderRange)
 //                if(Math.abs(player.getUnit_Point().y - nowObstacle.get(stageNum)[i].getObject_Point().y) > renderRange)
@@ -154,14 +184,40 @@ public class gamePanel extends JPanel implements ActionListener {
             if(nowObstacle.get(stageNum)[i].interfere(player.getUnit_Point(),player.getUnit_Size())){
                 player.setUnit_Point(map.getStartPoint().get(stageNum));
                 player.setisHooked(false);
+               if(stageNum==1) {
+                   Point p = new Point(10, 10);
+                   enemy.setUnit_Point(p);
+               }else if(stageNum==2){
+                   Point p = new Point(0, 0);
+                   laser.setUnit_Point(p);
+               }
             }
         }
 
+        // 골 겹침 검사
         if(nowGoal.get(stageNum).interfere(player.getUnit_Point(),player.getUnit_Size())){
             t.stop();
             frame.changePanel(panel);
         }
 
+        if(stageNum==1) {
+            // 유령 겹침 검사
+            if (enemy.interfere(player.getUnit_Point(), player.getUnit_Size())) {
+                player.setUnit_Point(map.getStartPoint().get(stageNum));
+                Point p = new Point(10, 10);
+                enemy.setUnit_Point(p);
+                player.setisHooked(false);
+            }
+        }else if(stageNum==2){
+            if(laser.interfere(player.getUnit_Point(),player.getUnit_Size())){
+                player.setUnit_Point(map.getStartPoint().get(stageNum));
+                Point p = new Point(0, 0);
+                laser.setUnit_Point(p);
+                player.setisHooked(false);
+            }
+        }
+
+        // 카메라 세팅
         camera.setCameraPoint(player.getUnit_Point());
 
         repaint();
@@ -199,6 +255,22 @@ public class gamePanel extends JPanel implements ActionListener {
                 (int) player.getUnit_Point().y- (int) camera.getCameraPoint().y,
                 this
         );
+
+        if(stageNum==1) {
+            g.drawImage(enemy.image,
+                    (int) enemy.getUnit_Point().x - (int) camera.getCameraPoint().x,
+                    (int) enemy.getUnit_Point().y - (int) camera.getCameraPoint().y,
+                    this
+            );
+        }else if(stageNum==2){
+            g.setColor(Color.YELLOW);
+            g.fillRect(
+                    (int) laser.getUnit_Point().x- (int) camera.getCameraPoint().x,
+                    (int) laser.getUnit_Point().y- (int) camera.getCameraPoint().y,
+                    laser.getUnit_Size().width,
+                    laser.getUnit_Size().height
+            );
+        }
 
         if (player.getisHooked()) {
             g.setColor(Color.YELLOW);
