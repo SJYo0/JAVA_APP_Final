@@ -23,7 +23,7 @@ public class Player extends Unit {
     private boolean isMousePressed[] = {false,false};
     private boolean canDash = false;
     private boolean isDashed = false;
-    private boolean isGrapObject = false;
+    private boolean isGrabObject = false;
     private boolean canHook = false;
     private boolean direction = false;
     private int count = 0, cut =0, nowMoving=0 ;
@@ -31,7 +31,7 @@ public class Player extends Unit {
     public BufferedImage originalImage = null;
     public Image image = null;
 
-    private Image[] stnad = null;
+    private Image[] stand = null;
     private Image[][] move = null;
     private Image[][] jump = null;
     private Image[][] swing = null;
@@ -64,10 +64,10 @@ public class Player extends Unit {
             System.out.println(e);
         }
 
-        stnad = new Image[2];
+        stand = new Image[2];
 
-        stnad[0] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
-        stnad[1] = filpImage(stnad[0]);
+        stand[0] = originalImage.getScaledInstance(45, 45, Image.SCALE_SMOOTH);
+        stand[1] = filpImage(stand[0]);
 
         move = new Image[2][8];
         jump = new Image[2][8];
@@ -152,7 +152,7 @@ public class Player extends Unit {
         else if((e.getKeyCode() == KeyEvent.VK_W) || (e.getKeyCode() == KeyEvent.VK_SPACE))
             isPressed[0] = false;
 
-        isGrapObject = false;
+        isGrabObject = false;
     }
 
     public void mousePressed(MouseEvent e){
@@ -220,11 +220,11 @@ public class Player extends Unit {
             if (overlapX < overlapY) {  // X축쪽이 적게 겹쳐서 X축으로 밀어냄
                 if (dx > 0) { // 오른쪽으로 적게 겹쳤다면
                     unit_Point.x = pPoint.x + pSize.width; // 오른쪽으로 밀어냄
-                    isGrapObject = true;
+                    isGrabObject = true;
                     canJump = true;
                 } else { // 왼쪽으로 적게 겹쳤다면
                     unit_Point.x = pPoint.x - unit_Size.width; // 왼쪽으로 밀어냄
-                    isGrapObject = true;
+                    isGrabObject = true;
                     canJump = true;
                 }
                 unit_Velocity.Velocity_X = 0;
@@ -274,12 +274,12 @@ public class Player extends Unit {
             if(nowMoving==1) image = move[0][cut];
             else if(nowMoving==2) image = jump[0][cut];
             else if(nowMoving == 3) {image = swing[0][cut/2];}
-            else image = stnad[0];
+            else image = stand[0];
         }else{
             if(nowMoving==1) image = move[1][cut];
             else if(nowMoving==2) image = jump[1][cut];
             else if(nowMoving == 3) image = swing[1][cut/2];
-            else image = stnad[1];
+            else image = stand[1];
         }
     }
 
@@ -296,7 +296,7 @@ public class Player extends Unit {
                 }
             }
         }
-        else if(isGrapObject){
+        else if(isGrabObject){
             unit_Velocity.Velocity_X = 0;
             unit_Velocity.Velocity_Y = 0;
         }

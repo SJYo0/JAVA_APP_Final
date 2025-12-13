@@ -35,7 +35,7 @@ public class gamePanel extends JPanel implements ActionListener {
 
     private gameMap map;
     private Timer t;
-    private int renderRange = 200;
+    //private int renderRange = 200;
     private int stageNum;
     private double click_x, click_y;
     private Camera camera;
@@ -44,13 +44,7 @@ public class gamePanel extends JPanel implements ActionListener {
     private Image image;
 
     private stagePanel panel;
-
-    // -------------------------실험-----------------
-    /*long lastTime = System.currentTimeMillis();
-    int frames = 0;*/
-    // --------------------------------------------
-
-
+    
     gamePanel(gameFrame pFrame, int pStageNum, stagePanel pPanel){
         frame = pFrame;
         panel = pPanel;
@@ -225,9 +219,9 @@ public class gamePanel extends JPanel implements ActionListener {
 
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+        // 배경 그리기
         g.drawImage(image, 0, 0, this);
-
+        // 장애물 그리기
         for (int i =0; i<nowObstacle.get(stageNum).length; i++){
             g.drawImage(nowObstacle.get(stageNum)[i].image,
                     (int) nowObstacle.get(stageNum)[i].getObject_Point().x - (int) camera.getCameraPoint().x,
@@ -235,7 +229,7 @@ public class gamePanel extends JPanel implements ActionListener {
                     this
             );
         }
-
+        // 지형 그리기
         for (int i = 0; i < nowStage.get(stageNum).length; i++) {
             g.drawImage(nowStage.get(stageNum)[i].image,
                     (int) nowStage.get(stageNum)[i].getObject_Point().x- (int) camera.getCameraPoint().x,
@@ -243,19 +237,19 @@ public class gamePanel extends JPanel implements ActionListener {
                     this
                     );
         }
-
+        // 도착지 그리기
         g.drawImage(nowGoal.get(stageNum).image,
                 (int) nowGoal.get(stageNum).getObject_Point().x- (int) camera.getCameraPoint().x,
                 (int) nowGoal.get(stageNum).getObject_Point().y- (int) camera.getCameraPoint().y,
                 this
         );
-
+        // 플레이어 그리기
         g.drawImage(player.image,
                 (int) player.getUnit_Point().x- (int) camera.getCameraPoint().x,
                 (int) player.getUnit_Point().y- (int) camera.getCameraPoint().y,
                 this
         );
-
+        // 적 객체 그리기
         if(stageNum==1) {
             g.drawImage(enemy.image,
                     (int) enemy.getUnit_Point().x - (int) camera.getCameraPoint().x,
@@ -271,7 +265,7 @@ public class gamePanel extends JPanel implements ActionListener {
                     laser.getUnit_Size().height
             );
         }
-
+        // 로프 그리기
         if (player.getisHooked()) {
             g.setColor(Color.YELLOW);
             g.drawLine(
@@ -281,14 +275,5 @@ public class gamePanel extends JPanel implements ActionListener {
                     (int) player.getHookPoint().y- (int) camera.getCameraPoint().y
             );
         }
-        // AI 제안 실험----------------------------------
-        // FPS 계산 로직
-        /*frames++;
-        if (System.currentTimeMillis() - lastTime >= 1000) {
-            System.out.println("FPS: " + frames); // 콘솔에 출력
-            frames = 0;
-            lastTime = System.currentTimeMillis();
-        }*/
-        //-------------------------------------
     }
 }
