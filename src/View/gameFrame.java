@@ -1,11 +1,14 @@
 package View;
 
+import Model.sound.playBGM.playBGM;
+
 import javax.swing.*;
 
 public class gameFrame extends JFrame {
     private JPanel nowPanel = null;
     private stagePanel StagePanel = new stagePanel(this);
     private gamePanel GamePanel;
+    private playBGM bgmThread;
 
     gameFrame() {
         setSize(1440, 840);
@@ -14,6 +17,9 @@ public class gameFrame extends JFrame {
 
         introPanel intro = new introPanel(this, StagePanel);
         changePanel(intro);
+
+        bgmThread = new playBGM();
+        bgmThread.start();
 
         setVisible(true);
     }
